@@ -19,10 +19,20 @@ You also need to generate key pair:
     openssl rsa -in storage/app/keys/jira.pem -pubout -out storage/app/keys/jira.pub
     cat storage/app/keys/jira.pub
 
+Add this to `config/services.php`:
+
+    'jira' => [
+        'client_id' => env('JIRA_KEY'),
+        'client_secret' => env('JIRA_SECRET'),
+        'redirect' => env('JIRA_REDIRECT_URI'),
+        'url' => env('JIRA_URL'),
+    ],
+
+
 Add this to `.env` file:
 
     JIRA_KEY=yourkeyfortheservice
     JIRA_SECRET=
     JIRA_REDIRECT_URI=https://yoursite.com/login
-    JIRA_URL=https://example.jira.com
+    JIRA_URL=http://example.jira.com
 
