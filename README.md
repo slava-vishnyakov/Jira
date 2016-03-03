@@ -9,3 +9,20 @@
 ## Documentation
 
 Full documentation for using this provider can be found at [Jira Documentation](http://socialiteproviders.github.io/providers/jira/)
+
+## Additional information
+
+You also need to generate key pair:
+
+    mkdir storage/app/keys
+    openssl genrsa -out storage/app/keys/jira.pem 1024
+    openssl rsa -in storage/app/keys/jira.pem -pubout -out storage/app/keys/jira.pub
+    cat storage/app/keys/jira.pub
+
+Add this to `.env` file:
+
+    JIRA_KEY=yourkeyfortheservice
+    JIRA_SECRET=
+    JIRA_REDIRECT_URI=https://yoursite.com/login
+    JIRA_URL=https://example.jira.com
+
