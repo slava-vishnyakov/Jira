@@ -9,7 +9,7 @@ use League\OAuth1\Client\Credentials\ClientCredentialsInterface;
 
 class Server extends BaseServer
 {
-    const JIRA_BASE_URL = 'http://example.jira.com';
+    public $baseUrl = 'http://example.jira.com';
 
     /**
      * Create a new server instance.
@@ -23,6 +23,9 @@ class Server extends BaseServer
     {
         // Pass through an array or client credentials, we don't care
         if (is_array($clientCredentials)) {
+            if(isset($clientCredentials['url'])) {
+                $this->baseUrl = $clientCredentials['url'];
+            }
             $clientCredentials = $this->createClientCredentials($clientCredentials);
         } elseif (!$clientCredentials instanceof ClientCredentialsInterface) {
             throw new \InvalidArgumentException('Client credentials must be an array or valid object.');
@@ -57,7 +60,7 @@ class Server extends BaseServer
      */
     public function urlTemporaryCredentials()
     {
-        return self::JIRA_BASE_URL.'/plugins/servlet/oauth/request-token?oauth_callback='.
+        return $this->baseUrl.'/plugins/servlet/oauth/request-token?oauth_callback='.
             rawurlencode($this->clientCredentials->getCallbackUri());
     }
 
@@ -66,7 +69,7 @@ class Server extends BaseServer
      */
     public function urlAuthorization()
     {
-        return self::JIRA_BASE_URL.'/plugins/servlet/oauth/authorize';
+        return $this->baseUrl.'/plugins/servlet/oauth/authorize';
     }
 
     /**
@@ -74,7 +77,7 @@ class Server extends BaseServer
      */
     public function urlTokenCredentials()
     {
-        return self::JIRA_BASE_URL.'/plugins/servlet/oauth/access-token';
+        return $this->baseUrl.'/plugins/servlet/oauth/access-token';
     }
 
     /**
@@ -82,7 +85,7 @@ class Server extends BaseServer
      */
     public function urlUserDetails()
     {
-        return self::JIRA_BASE_URL.'/rest/api/2/myself';
+        return $this->baseUrl.'/rest/api/2/myself';
     }
 
     /**
