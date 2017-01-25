@@ -10,29 +10,23 @@
 
 Full documentation for using this provider can be found at [Jira Documentation](http://socialiteproviders.github.io/providers/jira/)
 
-## Additional information
+## Generate key pair
+
 
 You also need to generate key pair:
-
+```
     mkdir storage/app/keys
     openssl genrsa -out storage/app/keys/jira.pem 1024
     openssl rsa -in storage/app/keys/jira.pem -pubout -out storage/app/keys/jira.pub
-    cat storage/app/keys/jira.pub
-
-Add this to `config/services.php`:
-
-    'jira' => [
-        'client_id' => env('JIRA_KEY'),
-        'client_secret' => env('JIRA_SECRET'),
-        'redirect' => env('JIRA_REDIRECT_URI'),
-        'url' => env('JIRA_URL'),
-    ],
+```
+Your key is now in storage/app/keys/jira.pub
 
 
-Add this to `.env` file:
-
-    JIRA_KEY=yourkeyfortheservice
-    JIRA_SECRET=
-    JIRA_REDIRECT_URI=https://yoursite.com/login
-    JIRA_URL=http://example.jira.com
-
+And add this to your .env file
+```
+JIRA_KEY="yourkey"
+JIRA_SECRET="yoursecret"
+JIRA_REDIRECT_URI="http://yoursite.com/social/auth/jira"
+JIRA_BASE_URI="https://example.atlassian.net"
+JIRA_CERT_PATH = "storage/app/keys/jira.pub"
+```

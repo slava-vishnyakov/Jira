@@ -4,12 +4,14 @@ namespace SocialiteProviders\Jira;
 
 use League\OAuth1\Client\Signature\Signature;
 use League\OAuth1\Client\Signature\SignatureInterface;
-use Guzzle\Http\Url;
+use GuzzleHttp\Psr7\Uri;
 
 class RsaSha1Signature extends Signature implements SignatureInterface
 {
+    private $certPath = '';
+
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function method()
     {
@@ -17,7 +19,7 @@ class RsaSha1Signature extends Signature implements SignatureInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function sign($uri, array $parameters = [], $method = 'POST')
     {
@@ -25,7 +27,11 @@ class RsaSha1Signature extends Signature implements SignatureInterface
         $baseString = $this->baseString($url, $method, $parameters);
 
         // Fetch the private key cert based on the request
-        $certificate = openssl_pkey_get_private('file://'.storage_path().'/app/keys/jira.pem');
+        $certificate = openssl_pkey_get_private("file://$this->certPath");
+
+        if ($certificate === false) {
+            throw new \Exception('Cannot get private key.');
+        }
 
         // Pull the private key ID from the certificate
         $privatekeyid = openssl_get_privatekey($certificate);
@@ -40,38 +46,49 @@ class RsaSha1Signature extends Signature implements SignatureInterface
     }
 
     /**
+     * Set cert path.
+     *
+     * @param $certPath
+     */
+    public function setCertPath($certPath)
+    {
+        $this->certPath = $certPath;
+    }
+
+    /**
      * Create a Guzzle url for the given URI.
      *
      * @param string $uri
      *
-     * @return Url
+     * @return Uri
      */
     protected function createUrl($uri)
     {
-        return Url::factory($uri);
+        $theUri = new Uri($uri);
+
+        return $theUri;
     }
 
     /**
      * Generate a base string for a RSA-SHA1 signature
      * based on the given a url, method, and any parameters.
      *
-     * @param Url    $url
+     * @param Uri    $url
      * @param string $method
      * @param array  $parameters
      *
      * @return string
      */
-    protected function baseString(Url $url, $method = 'POST', array $parameters = [])
+    protected function baseString(Uri $url, $method = 'POST', array $parameters = [])
     {
         $baseString = rawurlencode($method).'&';
-
-        $schemeHostPath = Url::buildUrl([
-            'scheme' => $url->getScheme(),
-            'host' => $url->getHost(),
-            'port' => $url->getPort(),
-            'path' => $url->getPath(),
-        ]);
-
+        $schemeHostPath = $url->getScheme().'://'.$url->getHost();
+        if ($url->getPort() != '') {
+            $schemeHostPath .= ':'.$url->getPort();
+        }
+        if ($url->getPath() != '') {
+            $schemeHostPath .= $url->getPath();
+        }
         $baseString .= rawurlencode($schemeHostPath).'&';
 
         $data = [];
